@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stok Barang Toko</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .group-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .group {
+      margin-bottom: 2rem;
+    }
+
+    .group h3 {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+    }
+
+    .sub-tables {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .sub-table {
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .sub-table span {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .buttons button {
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .add-btn {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .remove-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .count {
+      color: #555;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .sub-table {
+        font-size: 14px;
+      }
+
+      .buttons button {
+        font-size: 14px;
+        padding: 4px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2> Aisle</h2>
+  <div class="group-container" id="stock-container"></div>
+
+  <script>
+    const groups = ["SA", "SB"];
+    const maxSubs = 24;
+
+    function render() {
+      const container = document.getElementById("stock-container");
+      groups.forEach(group => {
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "group";
+        groupDiv.innerHTML = `<h3>Group ${group}</h3>`;
+        const subsDiv = document.createElement("div");
+        subsDiv.className = "sub-tables";
+
+        for (let i = 1; i <= maxSubs; i++) {
+          const sub = `${group}${String(i).padStart(2, '0')}`;
+          const subTable = document.createElement("div");
+          subTable.className = "sub-table";
+          subTable.innerHTML = `
+            <span>${sub}</span>
+            <div class="buttons">
+              <button class="add-btn" onclick="addItem('${sub}')">➕</button>
+              <button class="remove-btn" onclick="removeItem('${sub}')">➖</button>
+            </div>
+            <div class="count" id="${sub}-count">Jumlah: ...</div>
+          `;
+          subsDiv.appendChild(subTable);
+          getCount(sub);
+        }
+
+        groupDiv.appendChild(subsDiv);
+        container.appendChild(groupDiv);
+      });
+    }
+
+    async function getCount(sub) {
+      const res = await fetch(`get_count.php?sub=${sub}`);
+      const count = await res.text();
+      document.getElementById(`${sub}-count`).innerText = `Jumlah: ${count}`;
+    }
+
+    async function addItem(sub) {
+      const res = await fetch(`add_item.php?sub=${sub}`);
+      const txt = await res.text();
+      alert(txt);
+      getCount(sub);
+    }
+
+    async function removeItem(sub) {
+      const res = await fetch(`remove_item.php?sub=${sub}`);
+      const txt = await res.text();
+      alert(txt);
+      getCount(sub);
+    }
+
+    render();
+  </script>
+</body>
+</html>
